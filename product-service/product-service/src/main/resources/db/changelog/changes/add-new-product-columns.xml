@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+       http://www.liquibase.org/xml/ns/dbchangelog
+       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="4-add-new-product-columns" author="shakir">
+
+        <!-- additionalInfo -->
+        <addColumn tableName="product">
+            <column name="additional_info" type="VARCHAR(1000)"/>
+        </addColumn>
+
+        <!-- extraInfo -->
+        <addColumn tableName="product">
+            <column name="extra_info" type="VARCHAR(1000)"/>
+        </addColumn>
+
+        <!-- discountPercentage -->
+        <addColumn tableName="product">
+            <column name="discount_percentage" type="DOUBLE PRECISION"/>
+        </addColumn>
+
+        <!-- category (enum) -->
+        <addColumn tableName="product">
+            <column name="category" type="VARCHAR(255)"/>
+        </addColumn>
+
+        <!-- brand -->
+        <addColumn tableName="product">
+            <column name="brand" type="VARCHAR(255)"/>
+        </addColumn>
+
+        <!-- tag (enum) -->
+        <addColumn tableName="product">
+            <column name="tag" type="VARCHAR(255)"/>
+        </addColumn>
+
+        <!-- size -->
+        <addColumn tableName="product">
+            <column name="size" type="VARCHAR(100)"/>
+        </addColumn>
+
+        <!-- weight -->
+        <addColumn tableName="product">
+            <column name="weight" type="BIGINT"/>
+        </addColumn>
+
+        <!-- thumbnail -->
+        <addColumn tableName="product">
+            <column name="thumbnail" type="VARCHAR(500)"/>
+        </addColumn>
+
+        <!-- imagesList -->
+        <addColumn tableName="product">
+            <column name="images_list" type="VARCHAR(2000)"/>
+        </addColumn>
+
+        <!-- Rollback for safety -->
+        <rollback>
+            <dropColumn tableName="product" columnName="images_list"/>
+            <dropColumn tableName="product" columnName="thumbnail"/>
+            <dropColumn tableName="product" columnName="weight"/>
+            <dropColumn tableName="product" columnName="size"/>
+            <dropColumn tableName="product" columnName="tag"/>
+            <dropColumn tableName="product" columnName="brand"/>
+            <dropColumn tableName="product" columnName="category"/>
+            <dropColumn tableName="product" columnName="discount_percentage"/>
+            <dropColumn tableName="product" columnName="extra_info"/>
+            <dropColumn tableName="product" columnName="additional_info"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>
