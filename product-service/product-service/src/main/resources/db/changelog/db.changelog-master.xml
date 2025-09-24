@@ -36,5 +36,7 @@
     </changeSet>
     <include file="db/changelog/changes/add-price-column.xml"/>
     <include file="db/changelog/changes/add-new-product-columns.xml"/>
+    <include file="db/changelog/changes/add-table-pending-inventory.xml"/>
+    <include file="db/changelog/changes/add-table-pending-delete-inventory.xml"/>
 
 </databaseChangeLog>

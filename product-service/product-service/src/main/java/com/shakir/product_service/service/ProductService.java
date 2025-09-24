@@ -1,29 +1,19 @@
 package com.shakir.product_service.service;
 
-import com.shakir.product_service.dto.ProductCreateRequest;
-import com.shakir.product_service.entity.Product;
-import com.shakir.product_service.repository.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.shakir.product_service.dto.AddProductRequest;
+import com.shakir.product_service.dto.UpdateProductRequest;
+import com.shakir.util_service.product.ProductResponseDTO;
 
-import java.math.BigDecimal;
-import java.util.UUID;
+import java.util.List;
 
-@Service
-public class ProductService {
+public interface ProductService {
+    ProductResponseDTO addProduct(AddProductRequest request);
 
-    @Autowired
-    private ProductRepository productRepository;
+    List<ProductResponseDTO> getAllProduct();
 
-    public void addProduct(ProductCreateRequest request) {
-        Product product = Product.builder()
-                .id(UUID.randomUUID().toString())   // generate ID
-                .title(request.title())
-                .description(request.description())
-                .price(new BigDecimal(request.price()))
-                .build();
+    ProductResponseDTO getProductById(String id);
 
-        productRepository.save(product);
+    void deleteProductById(String id);
 
-    }
+    ProductResponseDTO updateProduct(UpdateProductRequest request);
 }
