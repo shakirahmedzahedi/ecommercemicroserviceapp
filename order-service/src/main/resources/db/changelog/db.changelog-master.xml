@@ -1,0 +1,62 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+          http://www.liquibase.org/xml/ns/dbchangelog
+          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- ================== ORDERS TABLE ================== -->
+    <changeSet id="1-create-orders" author="shakir">
+        <createTable tableName="orders">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="customer_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="order_price" type="decimal(19,2)"/>
+            <column name="tax" type="decimal(19,2)"/>
+            <column name="discount_amount" type="decimal(19,2)"/>
+
+            <!-- ENUMS stored as VARCHAR -->
+            <column name="payment_method" type="varchar(50)"/>
+            <column name="payment_status" type="varchar(50)"/>
+            <column name="order_status" type="varchar(50)"/>
+
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+
+            <!-- Embedded Address fields -->
+            <column name="street" type="varchar(255)"/>
+            <column name="city" type="varchar(100)"/>
+            <column name="state" type="varchar(100)"/>
+            <column name="zip" type="varchar(20)"/>
+            <column name="country" type="varchar(100)"/>
+
+            <column name="shipping_charge" type="decimal(19,2)"/>
+            <column name="grand_total" type="decimal(19,2)"/>
+        </createTable>
+    </changeSet>
+
+    <!-- ================== ORDER_ITEM TABLE ================== -->
+    <changeSet id="2-create-order-item" author="shakir">
+        <createTable tableName="order_item">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="product_id" type="varchar(36)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="quantity" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total" type="decimal(19,2)">
+            </column>
+            <column name="order_id" type="varchar(36)">
+                <constraints nullable="false" foreignKeyName="fk_order_item_order"
+                             references="orders(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
