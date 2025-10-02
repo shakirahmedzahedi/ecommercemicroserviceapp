@@ -10,14 +10,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    @Value("${spring.webclient.inventory.baseurl}")
-    private String inventoryBaseUrl;
-
     @Bean
     @LoadBalanced
-    public WebClient inventoryWebClient(WebClient.Builder builder){
-        return builder
-                .baseUrl(inventoryBaseUrl)
-                .build();
+    public WebClient.Builder webClientBuilder(){
+        return WebClient.builder();
     }
 }

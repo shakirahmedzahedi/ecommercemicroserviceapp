@@ -30,7 +30,7 @@ public class CartServiceImpl implements CartService{
     @Autowired
     CartItemRepository cartItemRepository;
     @Autowired
-    WebClient productWebClient;
+    WebClient.Builder webClientBuilder;
 
     @Override
     public CartResponseDTO addToCart(AddToCartRequest request) {
@@ -86,8 +86,9 @@ public class CartServiceImpl implements CartService{
     }
 
     private ProductResponseDTO getProductResponseDTO(String productId){
-        ResponseWrapper<ProductResponseDTO> productResponse = productWebClient.get()
-                .uri("/{id}",productId)
+        ResponseWrapper<ProductResponseDTO> productResponse = webClientBuilder.build()
+                .get()
+                .uri("http://product-service/api/v1/product/{id}",productId)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<ProductResponseDTO>>() {
                 })

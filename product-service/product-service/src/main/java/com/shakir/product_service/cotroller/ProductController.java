@@ -53,7 +53,7 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/allProducts")
+    @GetMapping("/public/allProducts")
     public ResponseEntity<?> getAllProducts(){
         ResponseWrapper<List<ProductResponseDTO>> response = new ResponseWrapper<>();
         List<ProductResponseDTO> productResponseDTOList = productService.getAllProduct();
@@ -61,7 +61,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(jsonUtils.responseWithSuccess(response,"OK"));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ResponseEntity<?> getProductById(@PathVariable String id){
         ResponseWrapper<ProductResponseDTO> response = new ResponseWrapper<>();
         ProductResponseDTO productResponseDTO = productService.getProductById(id);

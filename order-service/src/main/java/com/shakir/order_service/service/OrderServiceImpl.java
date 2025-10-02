@@ -6,6 +6,7 @@ import com.shakir.order_service.entity.OrderItem;
 import com.shakir.order_service.repository.OrderItemRepository;
 import com.shakir.order_service.repository.OrderRepository;
 import com.shakir.util_service.ResponseWrapper;
+import com.shakir.util_service.cart.CartResponseDTO;
 import com.shakir.util_service.constant.OrderStatus;
 import com.shakir.util_service.constant.PaymentMethod;
 import com.shakir.util_service.constant.PaymentStatus;
@@ -16,7 +17,6 @@ import com.shakir.util_service.inventory.UpdateStockRequest;
 import com.shakir.util_service.order.*;
 import com.shakir.util_service.product.ProductResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -34,11 +34,8 @@ public class OrderServiceImpl implements OrderService {
     @Autowired
     OrderItemRepository orderItemRepository;
     @Autowired
-    @Qualifier("productWebClient")
-    WebClient productWebClient;
-    @Autowired
-    @Qualifier("inventoryWebClient")
-    WebClient inventoryWebClient;
+    WebClient.Builder webClientBuilder;
+
 
     @Override
     public OrderResponseDTO confirmOrder(ConfirmOrderRequest request) {
@@ -95,7 +92,10 @@ public class OrderServiceImpl implements OrderService {
 
         orderRepository.save(order);
 
-        return toOrderResponseDTO(order);
+       if(!removeCartFromUser(request.customerId()).getSuccess().isEmpty()){
+           return toOrderResponseDTO(order);
+       }
+       return null;
     }
     private Address fromAddressDTO(AddressDTO addressDTO){
         return new Address(
@@ -140,8 +140,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private ProductResponseDTO getProductResponseDTO(String productId) {
-        ResponseWrapper<ProductResponseDTO> productResponse = productWebClient.get()
-                .uri("/{id}",productId)
+        ResponseWrapper<ProductResponseDTO> productResponse = webClientBuilder.build()
+                .get()
+                .uri("http://product-service/api/v1/product/{id}",productId)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<ProductResponseDTO>>() {
                 })
@@ -153,8 +154,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private InventoryResponseDTO getInventoryResponseDTO(String productId) {
-        ResponseWrapper<InventoryResponseDTO> inventoryResponse = inventoryWebClient.get()
-                .uri("/{id}",productId)
+        ResponseWrapper<InventoryResponseDTO> inventoryResponse = webClientBuilder.build()
+                .get()
+                .uri("http://inventory-service/api/v1/inventory/{id}",productId)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<InventoryResponseDTO>>() {
                 })
@@ -165,9 +167,21 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new EntityNotFoundException("Inventory data not found"));
     }
 
+    private ResponseWrapper<CartResponseDTO> removeCartFromUser(String customerId) {
+
+        return webClientBuilder.build()
+                .delete()
+                .uri("http://cart-service/api/v1/cart/{id}",customerId)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<CartResponseDTO>>() {
+                })
+                .block();
+    }
+
     private InventoryResponseDTO updateInventory(String productId, Long quantity) {
-        ResponseWrapper<InventoryResponseDTO> inventoryResponse = inventoryWebClient.put()
-                .uri("/updateStock")
+        ResponseWrapper<InventoryResponseDTO> inventoryResponse = webClientBuilder.build()
+                .put()
+                .uri("http://inventory-service/api/v1/inventory/updateStock")
                 .bodyValue(new UpdateStockRequest(productId,quantity))
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<InventoryResponseDTO>>() {

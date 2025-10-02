@@ -14,6 +14,7 @@ import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -35,9 +36,12 @@ public class ProductMapper {
     @Autowired
     private RateLimiterRegistry rateLimiterRegistry;
     @Autowired
-    private WebClient inventoryWebClient;
+    private WebClient.Builder webClientBuilder;
     @Autowired
     InventoryFallBackHandler inventoryFallBackHandler;
+
+    @Value("${spring.webclient.inventory.baseurl}")
+    private String inventoryBaseUrl;
 
     public ProductResponseDTO toProductResponseDTO(Product product, long stock) {
 
@@ -93,8 +97,9 @@ public class ProductMapper {
                 RateLimiter.decorateSupplier(rateLimiter,
                         Retry.decorateSupplier(retry,
                                 () -> cb.run(
-                                        () -> inventoryWebClient.post()
-                                                .uri("/addStock")
+                                        () -> webClientBuilder.build()
+                                                .post()
+                                                .uri("http://inventory-service/api/v1/inventory/addStock")
                                                 .bodyValue(addStockRequest)
                                                 .retrieve()
                                                 .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<InventoryResponseDTO>>() {})
@@ -113,8 +118,9 @@ public class ProductMapper {
         Supplier<ResponseWrapper<InventoryResponseDTO>> supplier = RateLimiter.decorateSupplier(rateLimiter,
                 Retry.decorateSupplier(retry,
                         ()-> cb.run(
-                                ()-> inventoryWebClient.get()
-                                        .uri("/{productId}", product.getId())
+                                ()-> webClientBuilder.build()
+                                        .get()
+                                        .uri("http://inventory-service/api/v1/inventory/{productId}", product.getId())
                                         .retrieve()
                                         .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<InventoryResponseDTO>>() {
                                         })
@@ -136,8 +142,9 @@ public class ProductMapper {
         Supplier<ResponseWrapper<InventoryResponseDTO>> supplier = RateLimiter.decorateSupplier(rateLimiter,
                 Retry.decorateSupplier(retry,
                         ()-> cb.run(
-                                ()-> inventoryWebClient.put()
-                                        .uri("/updateStock")
+                                ()-> webClientBuilder.build()
+                                        .put()
+                                        .uri("http://inventory-service/api/v1/inventory/updateStock")
                                         .bodyValue(updateStockRequest)
                                         .retrieve()
                                         .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<InventoryResponseDTO>>() {
@@ -160,8 +167,9 @@ public class ProductMapper {
         Supplier<ResponseWrapper<InventoryResponseDTO>> supplier = RateLimiter.decorateSupplier(rateLimiter,
                 Retry.decorateSupplier(retry,
                         () -> cb.run(
-                                () -> inventoryWebClient.delete()
-                                        .uri("/{productId}", productId)
+                                () -> webClientBuilder.build()
+                                        .delete()
+                                        .uri("http://inventory-service/api/v1/inventory/{productId}", productId)
                                         .retrieve()
                                         .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<InventoryResponseDTO>>() {
                                         })

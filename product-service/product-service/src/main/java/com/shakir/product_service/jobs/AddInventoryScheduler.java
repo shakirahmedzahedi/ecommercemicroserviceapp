@@ -16,6 +16,7 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
 import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -34,13 +35,15 @@ public class AddInventoryScheduler {
     @Autowired
     private PendingDeleteInventoryRepository pendingDeleteInventoryRepository;
     @Autowired
-    private WebClient inventoryWebClient;
+    private WebClient.Builder webClientBuilder;
     @Autowired
     private CircuitBreakerFactory<?, ?> cbFactory;
     @Autowired
     private RateLimiterRegistry rateLimiterRegistry;
     @Autowired
     private RetryRegistry retryRegistry;
+    @Value("${spring.webclient.inventory.baseurl}")
+    private String inventoryBaseUrl;
 
     @Scheduled(fixedRate = 60000)
     public void addPendingInventory(){
@@ -58,8 +61,9 @@ public class AddInventoryScheduler {
                 Supplier<ResponseWrapper<InventoryResponseDTO>> supplier = RateLimiter.decorateSupplier(rateLimiter,
                         Retry.decorateSupplier(retry,
                                 ()-> circuitBreaker.run(
-                                        ()-> inventoryWebClient.post()
-                                                .uri("/addStock")
+                                        ()-> webClientBuilder.build()
+                                                .post()
+                                                .uri("http://inventory-service/api/v1/inventory/addStock")
                                                 .bodyValue(request)
                                                 .retrieve()
                                                 .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<InventoryResponseDTO>>() {})
@@ -91,8 +95,9 @@ public class AddInventoryScheduler {
             Supplier<ResponseWrapper<InventoryResponseDTO>> supplier = RateLimiter.decorateSupplier(rateLimiter,
                     Retry.decorateSupplier(retry,
                             ()-> circuitBreaker.run(
-                                    ()-> inventoryWebClient.delete()
-                                            .uri("/{productId}", inventoryItem.getProductId())
+                                    ()-> webClientBuilder.build()
+                                            .delete()
+                                            .uri("http://inventory-service/api/v1/inventory/{productId}", inventoryItem.getProductId())
                                             .retrieve()
                                             .bodyToMono(new ParameterizedTypeReference<ResponseWrapper<InventoryResponseDTO>>() {})
                                             .block(),

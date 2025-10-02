@@ -1,6 +1,5 @@
 package com.shakir.cart_service.config.webClient;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,15 +8,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class WebClientConfig {
 
-    @Value("${spring.webclient.product.baseurl}")
-    private String productBaseUrl;
 
     @Bean
     @LoadBalanced
-    public WebClient productWebClient(WebClient.Builder builder){
-        return builder
-                .baseUrl(productBaseUrl)
-                .build();
+    public WebClient.Builder productWebClient(){
+        return WebClient.builder();
     }
 }
 
